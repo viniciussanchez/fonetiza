@@ -7,6 +7,7 @@ uses Fonetiza.Intf;
 type
   TFonetiza = class(TInterfacedObject, IFonetiza)
   private
+    function SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
     function RemoverCaracteresEspeciais(const AValue: string): string;
     function RemoverConteudos(const AValue: string; const AConteudo: TArray<string>): string;
     function RemoverAcentuacoes(const AValue: string): string;
@@ -24,17 +25,17 @@ uses System.SysUtils, System.StrUtils, Fonetiza.Consts;
 
 function TFonetiza.Fonetizar(const AValue: string): string;
 begin
-  Result := AValue.ToUpper;
+  Result := AValue.Trim.ToUpper;
   Result := Self.RemoverAcentuacoes(Result);
   Result := Self.RemoverCaracteresEspeciais(Result);
   Result := Self.RemoverConteudos(Result, PREPOSICOES);
   Result := Self.RemoverConteudos(Result, TITULOS);
-//  Result := StringReplacer.replaceStrings(Result, LETRAS);
-//  Result := StringReplacer.replaceStrings(Result, numberReplacements);
+  Result := Self.SubstituirConteudos(Result, LETRAS);
+  Result := Self.SubstituirConteudos(Result, NUMEROS);
 //  Result := NumberReplacer.replaceNumbers(Result);
 //  Result := PhonetizerBR.phonetize(Result);
-//  Result := StringReplacer.replaceStrings(Result, nameReplacements);
-//  Result := StringReplacer.replaceStrings(Result, synonimReplacements);
+  Result := Self.SubstituirConteudos(Result, NOMES);
+  Result := Self.SubstituirConteudos(Result, SINONIMOS);
 end;
 
 function TFonetiza.GerarCodigoFonetico(const AValue: string): string;
@@ -72,16 +73,22 @@ var
   LPalavra: string;
   LPalavras: TArray<string>;
 begin
-  LPalavras := AValue.Trim.Split([' ']);
+  LPalavras := AValue.Split([' ']);
   for LPalavra in LPalavras do
   begin
-    if not MatchStr(LPalavra, AConteudo) then
-    begin
-      if not Result.Trim.IsEmpty then
-        Result := Result + ' ';
-      Result := Result + LPalavra;
-    end;
+    if MatchStr(LPalavra, AConteudo) then
+      Continue;
+    if not Result.Trim.IsEmpty then
+      Result := Result + ' ';
+    Result := Result + LPalavra;
   end;
+end;
+
+function TFonetiza.SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
+var
+  LPalavras: TArray<string>;
+begin
+  LPalavras := AValue.Split([' ']);
 end;
 
 end.
