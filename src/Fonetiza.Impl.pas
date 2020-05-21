@@ -86,9 +86,25 @@ end;
 
 function TFonetiza.SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
 var
-  LPalavras: TArray<string>;
+  LPalavra, LResultado: string;
+  LConteudo, LPalavras: TArray<string>;
 begin
   LPalavras := AValue.Split([' ']);
+  for LPalavra in LPalavras do
+  begin
+    LResultado := LPalavra;
+    for LConteudo in AConteudo do
+    begin
+      if LConteudo[0].Equals(LPalavra) then
+      begin
+        LResultado := LConteudo[1];
+        Break;
+      end;
+    end;
+    if not Result.Trim.IsEmpty then
+      Result := Result + ' ';
+    Result := Result + LResultado;
+  end;
 end;
 
 end.
