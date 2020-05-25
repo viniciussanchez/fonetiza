@@ -7,6 +7,7 @@ uses Fonetiza.Intf;
 type
   TFonetiza = class(TInterfacedObject, IFonetiza)
   private
+    function SomarCaracteres(const AValue: string): string;
     function SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
     function RemoverCaracteresEspeciais(const AValue: string): string;
     function RemoverConteudos(const AValue: string; const AConteudo: TArray<string>): string;
@@ -32,7 +33,7 @@ begin
   Result := Self.RemoverConteudos(Result, TITULOS);
   Result := Self.SubstituirConteudos(Result, LETRAS);
   Result := Self.SubstituirConteudos(Result, NUMEROS);
-//  Result := NumberReplacer.replaceNumbers(Result);
+  Result := Self.SomarCaracteres(Result);
 //  Result := PhonetizerBR.phonetize(Result);
   Result := Self.SubstituirConteudos(Result, NOMES);
   Result := Self.SubstituirConteudos(Result, SINONIMOS);
@@ -82,6 +83,50 @@ begin
       Result := Result + ' ';
     Result := Result + LPalavra;
   end;
+end;
+
+function TFonetiza.SomarCaracteres(const AValue: string): string;
+var
+  LPalavra: string;
+  LPalavras: TArray<string>;
+  LSoma, LValor: Integer;
+begin
+  LSoma := 0;
+	LPalavras := AValue.Split([' ']);
+  for LPalavra in LPalavras do
+  begin
+    if LPalavra.Trim.Equals('E') then
+      Continue;
+    if LPalavra.Trim.Equals('MIL') then
+    begin
+      if LSoma = 0 then
+        LSoma := 1000
+      else
+      begin
+        LSoma := LSoma * 1000;
+        Continue;
+      end;
+    end
+    else
+    begin
+      LValor := StrToIntDef(LPalavra, 0);
+      if LValor <> 0 then
+      begin
+        LSoma := LSoma + LValor;
+        Continue;
+      end
+      else
+      begin
+        if LSoma <> 0 then
+          Result := Result + LSoma.ToString;
+        LSoma = 0;
+        Continue;
+      end;
+    end;
+    Result := Result + LPalavra;
+  end;
+	if LSoma <> 0 then
+  	Result := Result + LSoma.ToString;
 end;
 
 function TFonetiza.SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
