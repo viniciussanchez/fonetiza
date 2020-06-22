@@ -9,7 +9,7 @@ const
   TITULOS: TArray<string> = ['BEL', 'CEL', 'ENG', 'MAJ', 'PROF', 'MIN', 'TEN', 'CAP', 'DR', 'DRA', 'GAL', 'GEN', 'MED', 'PE',
     'SARG', 'SGT', 'VVA', 'SR', 'SRA', 'MSC', 'CB', 'SD', 'SEN', 'BACHAREL', 'CORONEL', 'ENGENHEIRO', 'PROFESSOR', 'PROFESSORA',
     'MINISTRO', 'TENENTE', 'DOUTOR', 'DOUTORA', 'GENERAL', 'MEDICO', 'PADRE', 'SARGENTO', 'CABO', 'SOLDADO', 'DEP', 'PASTOR',
-    'PASTORA', 'PR', 'PRA', 'MESTRE', 'ME', 'OFICIAL', 'OF', 'PRESIDENTE', 'VEREADOR', 'VER'];
+    'PASTORA', 'MESTRE', 'OFICIAL', 'PRESIDENTE', 'VEREADOR'];
 
   LETRAS: TArray<TArray<string>> = [['AGA', 'H'], ['BE', 'B'], ['CA', 'K'], ['CE', 'C'], ['DABLIU', 'W'], ['EFE', 'F'],
     ['ELE', 'L'], ['EME', 'M'], ['ENE', 'N'], ['ERRE', 'R'], ['ESSE', 'S'], ['GE', 'G'], ['IPSILOM', 'Y'], ['IPSILON', 'Y'],
