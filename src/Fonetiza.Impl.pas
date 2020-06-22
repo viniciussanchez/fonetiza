@@ -24,37 +24,24 @@ implementation
 
 { TFonetiza }
 
-uses System.SysUtils, System.StrUtils, Fonetiza.Consts;
+uses System.SysUtils, System.StrUtils, Fonetiza.Consts, System.Generics.Collections;
 
 function TFonetiza.Fonetizar(const AValue: string): string;
 begin
-  // converte tudo para maiusculo
   Result := AValue.Trim.ToUpper;
-
   Result := Self.RemoverAcentuacoes(Result);
   Result := Self.RemoverCaracteresEspeciais(Result);
   Result := Self.RemoverConteudos(Result, PREPOSICOES);
   Result := Self.RemoverConteudos(Result, TITULOS);
-
-  // substitui letras por extenso pela letra mesmo
   Result := Self.SubstituirConteudos(Result, LETRAS);
-
-  // substitui numeros extensos por digitos
   Result := Self.SubstituirConteudos(Result, NUMEROS);
-
-  // soma sequencias de palavras feitas de digitos
   Result := Self.SomarCaracteres(Result);
-
-  // remove caracteres duplicados (SS > S, RR > R...)
   Result := Self.RemoverCaracteresDuplicados(Result);
 
   // fonetiza (a mágica fica aqui!)
   Result := Self.GerarConteudoFonetico(Result);
 
-  // substitui nomes parecidos
   Result := Self.SubstituirConteudos(Result, NOMES);
-
-  // substitui sinonimos foneticos
   Result := Self.SubstituirConteudos(Result, SINONIMOS);
 end;
 
@@ -85,17 +72,12 @@ var
   LChar: Char;
 begin
   LChar := ' ';
-
-  // percorre caracter a caracter do conteúdo
-  for I := 0 to Pred(AValue.Length) do
+  for I := 1 to AValue.Length do
   begin
-    // elimina o caracter se ele for duplicata e nao for numero, espaco ou S
-    if ((AValue[i] <> LChar) or (AValue[I] = ' ') or ((AValue[i] >= '0') and (AValue[I] <= '9')) or ((AValue[I] = 'S') and (AValue[I - 1] = 'S') and ((I > 1) and (AValue[I - 2] <> 'S')))) then
+    if ((AValue[I] <> LChar) or (AValue[I] = ' ') or ((AValue[I] >= '0') and (AValue[I] <= '9')) or ((AValue[I] = 'S') and (AValue[I - 1] = 'S') and ((I > 1) and (AValue[I - 2] <> 'S')))) then
       Result := Result + AValue[I];
-
     LChar := AValue[I];
   end;
-
   Result := Result.Trim;
 end;
 
@@ -127,54 +109,69 @@ end;
 function TFonetiza.SomarCaracteres(const AValue: string): string;
 var
   LSoma, LValor: Integer;
-  LPalavras: TArray<string>;
+  LPalavras: TList<string>;
+  LPalavra: string;
   I: Integer;
 begin
-  LPalavras := AValue.Split([' ']);
-
-  // percorre o texto, palavra a palavra
-  for I := 0 to Pred(Length(LPalavras)) do
-  begin
-    // ignora a palavra do texto se ela for "E"
-    if LPalavras[I].Equals('E') then
-      Continue;
-
-    // se a palavra for "MIL", multiplica o valor acumulado da soma por mil e ignora a palavra do texto
-    if LPalavras[I].Equals('MIL') then
+  I := 0;
+  LSoma := 0;
+  LPalavras := TList<string>.Create();
+  try
+    LPalavras.AddRange(AValue.Split([' ']));
+    while I < LPalavras.Count do
     begin
-      if LSoma <> 0 then
+      LPalavra := LPalavras.Items[I];
+			if LPalavra.Equals('E') then
       begin
-        LSoma := LSoma * 1000;
-        Continue;
+				LPalavras.Delete(I);
+				Dec(I);
+			end
+      else
+      begin
+				if LPalavra.Equals('MIL') then
+        begin
+					if LSoma = 0 then
+						LSoma := 1000
+					else
+          begin
+						LSoma := LSoma * 1000;
+						LPalavras.Delete(I);
+						Dec(I);
+					end;
+				end
+        else
+        begin
+					LValor := StrToIntDef(LPalavra, 0);
+					if LValor <> 0 then
+          begin
+						if LSoma <> 0 then
+            begin
+							LPalavras.Delete(I - 1);
+							Dec(I);
+						end;
+						LSoma := LSoma + LValor;
+					end
+					else
+          begin
+						if LSoma <> 0 then
+							LPalavras.Items[I - 1] := LSoma.ToString;
+						LSoma := 0;
+					end;
+        end;
       end;
-
-      LSoma := 1000;
-      Result := Result + LPalavras[I];
-      Continue;
+      Inc(I);
     end;
-
-    // verifica se é um valor
-    LValor := StrToIntDef(LPalavras[I], 0);
-
-    if LValor <> 0 then
+		if LSoma <> 0 then
+			LPalavras.Items[Pred(LPalavras.Count)] := LSoma.ToString;
+    for LPalavra in LPalavras do
     begin
-      if LSoma = 0 then
-        Result := Result + LPalavras[I];
-
-      // o valor da palavra eh somado ao valor acumulado
-      LSoma := LSoma + LValor;
-      Continue;
+      if not Result.IsEmpty then
+        Result := Result + ' ';
+      Result := Result + LPalavra;
     end;
-
-    // se a palavra nao for um numero e o valor acumulado for diferente de zero o valor descrito eh substituido por sua forma numerica
-    if LSoma <> 0 then
-      Result := Result + LSoma.ToString;
-
-    LSoma := 0;
+  finally
+    LPalavras.Free;
   end;
-
-  if LSoma <> 0 then
-    Result := Result + LSoma.ToString;
 end;
 
 function TFonetiza.SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
@@ -183,26 +180,19 @@ var
   LConteudo, LPalavras: TArray<string>;
 begin
   LPalavras := AValue.Split([' ']);
-
-  // percorre palavra a palavra
   for LPalavra in LPalavras do
   begin
     LResultado := LPalavra;
-
-    // percorre todas as palavras que não devem conter na string
     for LConteudo in AConteudo do
     begin
-      // se localizar a palavra, substitui a mesma
       if LConteudo[0].Equals(LPalavra) then
       begin
         LResultado := LConteudo[1];
         Break;
       end;
     end;
-
     if not Result.Trim.IsEmpty then
       Result := Result + ' ';
-
     Result := Result + LResultado;
   end;
 end;

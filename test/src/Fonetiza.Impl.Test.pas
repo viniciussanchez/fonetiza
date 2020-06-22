@@ -15,6 +15,9 @@ type
     procedure TestRemoverAcentuacoes;
     procedure TestRemoverCaracteresEspeciais;
     procedure TestRemoverConteudos;
+    procedure TestSubstituirConteudos;
+    procedure TestRemoverCaracteresDuplicados;
+    procedure TestSomarCaracteres;
   end;
 
 implementation
@@ -40,6 +43,17 @@ begin
   CheckEquals(CARACTERES_SEM_ACENTO, LReturn);
 end;
 
+procedure TTestFonetiza.TestRemoverCaracteresDuplicados;
+const
+  CONTEUDO = 'AA RUA DA NOSSA CASA POSSSUI  11    ANOS E 3333 DIAS';
+  CONTEUDO_VALIDO = 'A RUA DA NOSSA CASA POSSUI  11    ANOS E 3333 DIAS';
+var
+  LReturn: string;
+begin
+  LReturn := FFonetiza.RemoverCaracteresDuplicados(CONTEUDO);
+  CheckEquals(CONTEUDO_VALIDO, LReturn);
+end;
+
 procedure TTestFonetiza.TestRemoverCaracteresEspeciais;
 const
   CARACTERES_ESPERADOS = ' VINICIUS SANCHEZ 1995 ';
@@ -60,6 +74,29 @@ var
   LReturn: string;
 begin
   LReturn := FFonetiza.RemoverConteudos(CONTEUDO, CONTEUDO_INVALIDO);
+  CheckEquals(CONTEUDO_VALIDO, LReturn);
+end;
+
+procedure TTestFonetiza.TestSomarCaracteres;
+const
+  CONTEUDO = '3 MIL E 100 CABEÇAS DE GADO, MIL NOVILHAS E MIL';
+  CONTEUDO_VALIDO = '3100 CABEÇAS DE GADO, 1000 NOVILHAS 1000';
+var
+  LReturn: string;
+begin
+  LReturn := FFonetiza.SomarCaracteres(CONTEUDO);
+  CheckEquals(CONTEUDO_VALIDO, LReturn);
+end;
+
+procedure TTestFonetiza.TestSubstituirConteudos;
+const
+  CONTEUDO = 'RUA TREZE DE MAIO';
+  CONTEUDO_INVALIDO: TArray<TArray<string>> = [['RUA', 'R'], ['TREZE', '13']];
+  CONTEUDO_VALIDO = 'R 13 DE MAIO';
+var
+  LReturn: string;
+begin
+  LReturn := FFonetiza.SubstituirConteudos(CONTEUDO, CONTEUDO_INVALIDO);
   CheckEquals(CONTEUDO_VALIDO, LReturn);
 end;
 
