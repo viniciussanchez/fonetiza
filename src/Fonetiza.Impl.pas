@@ -989,6 +989,8 @@ begin
   // remonta as palavras armazenadas no vetor em um unico string
   for LPalavra in LPalavras do
   begin
+    if LPalavra.Trim.IsEmpty then
+      Continue;
     if not Result.Trim.IsEmpty then
       Result := Result + ' ';
     Result := Result + LPalavra.Trim;
