@@ -442,6 +442,11 @@ begin
         else
           ACaracterMudo := True;
       end;
+    'H':
+      begin
+        // H eh desconsiderado
+        Exit;
+      end;
     'i':
       begin
         if fonaux[I + 2] = ' ' then
@@ -742,7 +747,7 @@ begin
         else
           ACaracterMudo := True;
       end;
-    'W':
+    'V', 'W':
       begin
         // V,W inicial + vogal -> o + vogal (U + vogal)
         if ((fonaux[I + 1] = 'a') or (fonaux[I + 1] = 'i') or (fonaux[I + 1] = 'o')) then
@@ -769,6 +774,11 @@ begin
       begin
         // caracter nao eh modificado
         ACaracterMudo := True;
+      end;
+    'Y':
+      begin
+        // Y jah foi tratado acima
+        Exit;
       end;
     'Z':
       begin
