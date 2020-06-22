@@ -12,6 +12,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestGerarConteudoFonetico;
     procedure TestRemoverAcentuacoes;
     procedure TestRemoverCaracteresEspeciais;
     procedure TestRemoverConteudos;
@@ -30,6 +31,12 @@ end;
 procedure TTestFonetiza.TearDown;
 begin
   FFonetiza.Free;
+end;
+
+procedure TTestFonetiza.TestGerarConteudoFonetico;
+begin
+  CheckEquals('GIUZI', FFonetiza.GerarConteudoFonetico('JOSE'));
+  CheckEquals('KARLU', FFonetiza.GerarConteudoFonetico('CARLOS'));
 end;
 
 procedure TTestFonetiza.TestRemoverAcentuacoes;

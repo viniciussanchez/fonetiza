@@ -13,7 +13,7 @@ type
     Label2: TLabel;
     edtConteudo: TEdit;
     btnFonetizar: TButton;
-    edtResultadoFonetico: TEdit;
+    mmResultadoFonetico: TMemo;
     procedure btnFonetizarClick(Sender: TObject);
   end;
 
@@ -31,7 +31,7 @@ var
   LFonetiza: IFonetiza;
 begin
   LFonetiza := TFonetiza.Create;
-  edtResultadoFonetico.Text := LFonetiza.Fonetizar(edtConteudo.Text);
+  mmResultadoFonetico.Lines.Add(LFonetiza.Fonetizar(edtConteudo.Text));
 end;
 
 end.

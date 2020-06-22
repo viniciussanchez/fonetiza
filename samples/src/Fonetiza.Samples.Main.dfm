@@ -11,6 +11,7 @@ object FrmMain: TFrmMain
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
@@ -41,7 +42,6 @@ object FrmMain: TFrmMain
     BevelOuter = bvNone
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 31
     object Label1: TLabel
       Left = 13
       Top = 10
@@ -95,12 +95,12 @@ object FrmMain: TFrmMain
       TabOrder = 1
       OnClick = btnFonetizarClick
     end
-    object edtResultadoFonetico: TEdit
+    object mmResultadoFonetico: TMemo
       Left = 13
       Top = 82
-      Width = 593
-      Height = 21
-      ReadOnly = True
+      Width = 596
+      Height = 183
+      ScrollBars = ssVertical
       TabOrder = 2
     end
   end
