@@ -91,10 +91,10 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="src\Fonetiza.Impl.Test.pas"/>
-        <DCCReference Include="..\src\Fonetiza.Consts.pas"/>
-        <DCCReference Include="..\src\Fonetiza.Impl.pas"/>
-        <DCCReference Include="..\src\Fonetiza.Intf.pas"/>
+        <DCCReference Include="src\Fonetiza.Utils.Test.pas"/>
+        <DCCReference Include="..\src\Fonetiza.Utils.pas"/>
+        <DCCReference Include="..\src\Fonetiza.Core.pas"/>
+        <DCCReference Include="src\Fonetiza.Core.Test.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

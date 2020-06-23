@@ -6,10 +6,10 @@ program fonetizaTests;
 
 uses
   DUnitTestRunner,
-  Fonetiza.Impl.Test in 'src\Fonetiza.Impl.Test.pas',
-  Fonetiza.Consts in '..\src\Fonetiza.Consts.pas',
-  Fonetiza.Impl in '..\src\Fonetiza.Impl.pas',
-  Fonetiza.Intf in '..\src\Fonetiza.Intf.pas';
+  Fonetiza.Utils.Test in 'src\Fonetiza.Utils.Test.pas',
+  Fonetiza.Utils in '..\src\Fonetiza.Utils.pas',
+  Fonetiza.Core in '..\src\Fonetiza.Core.pas',
+  Fonetiza.Core.Test in 'src\Fonetiza.Core.Test.pas';
 
 {$R *.RES}
 

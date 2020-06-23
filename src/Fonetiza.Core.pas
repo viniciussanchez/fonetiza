@@ -1,202 +1,219 @@
-unit Fonetiza.Impl;
+unit Fonetiza.Core;
 
 interface
 
-uses Fonetiza.Intf, System.SysUtils;
+uses System.SysUtils;
 
 type
-  TFonetiza = class(TInterfacedObject, IFonetiza)
+  TFonetizaCore = class
   private
     procedure TratarCaracterFonetico(var fonaux, APalavraFonetica: TCharArray; var I, J, newmud: Integer; var ACopiarFonema, ACaracterMudo: Boolean);
   public
     function GerarConteudoFonetico(const AValue: string): string;
-    function SomarCaracteres(const AValue: string): string;
-    function SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
-    function RemoverCaracteresDuplicados(const AValue: string): string;
-    function RemoverCaracteresEspeciais(const AValue: string): string;
-    function RemoverConteudos(const AValue: string; const AConteudo: TArray<string>): string;
-    function RemoverAcentuacoes(const AValue: string): string;
-    { IFonetiza }
-    function Fonetizar(const AValue: string): string;
-    function GerarCodigoFonetico(const AValue: string): string;
-    function GerarListaCodigosFoneticos(const AValue: string): TArray<string>;
   end;
 
 implementation
 
-{ TFonetiza }
+{ TFonetizaCore }
 
-uses System.StrUtils, Fonetiza.Consts, System.Generics.Collections;
-
-function TFonetiza.Fonetizar(const AValue: string): string;
-begin
-  Result := AValue.Trim.ToUpper;
-  Result := Self.RemoverAcentuacoes(Result);
-  Result := Self.RemoverCaracteresEspeciais(Result);
-  Result := Self.RemoverConteudos(Result, PREPOSICOES);
-  Result := Self.RemoverConteudos(Result, TITULOS);
-  Result := Self.SubstituirConteudos(Result, LETRAS);
-  Result := Self.SubstituirConteudos(Result, NUMEROS);
-  Result := Self.SomarCaracteres(Result);
-  Result := Self.RemoverCaracteresDuplicados(Result);
-  Result := Self.GerarConteudoFonetico(Result);
-  Result := Self.SubstituirConteudos(Result, NOMES);
-  Result := Self.SubstituirConteudos(Result, SINONIMOS);
-end;
-
-function TFonetiza.GerarCodigoFonetico(const AValue: string): string;
-begin
-  Result := Self.Fonetizar(AValue);
-//  Result := CodeGenerator.randomize(Result);
-end;
-
-function TFonetiza.GerarListaCodigosFoneticos(const AValue: string): TArray<string>;
+function TFonetizaCore.GerarConteudoFonetico(const AValue: string): string;
 var
-  LConteudoFonetico: string;
-begin
-  LConteudoFonetico := Self.Fonetizar(AValue);
-//  Result := MultipleCodeGenerator.generateCodes(LConteudoFonetico);
-end;
+  // vetores de caracteres utilizadas para manipular o texto
+  LPalavraAtual: TCharArray;
+  fonaux: TCharArray;
+  LPalavraFonetica: TCharArray;
+  fonfon: TCharArray;
 
-function TFonetiza.RemoverAcentuacoes(const AValue: string): string;
-type
-  USAscii20127 = type AnsiString(20127);
-begin
-  Result := string(USAscii20127(AValue));
-end;
+  // indica se o fonema eh mudo
+  newmud: Integer;
 
-function TFonetiza.RemoverCaracteresDuplicados(const AValue: string): string;
-var
-  I: Integer;
-  LChar: Char;
-begin
-  LChar := ' ';
-  for I := 1 to AValue.Length do
-  begin
-    if ((AValue[I] <> LChar) or (AValue[I] = ' ') or ((AValue[I] >= '0') and (AValue[I] <= '9')) or ((AValue[I] = 'S') and (AValue[I - 1] = 'S') and ((I > 1) and (AValue[I - 2] <> 'S')))) then
-      Result := Result + AValue[I];
-    LChar := AValue[I];
-  end;
-  Result := Result.Trim;
-end;
-
-function TFonetiza.RemoverCaracteresEspeciais(const AValue: string): string;
-var
   LCaracter: Char;
-begin
-  for LCaracter in AValue do
-    if CharInSet(LCaracter, ['A' .. 'Z', '0' .. '9']) or (LCaracter = ' ') or (LCaracter = '_') or (LCaracter = '&') then
-      Result := Result + LCaracter;
-end;
-
-function TFonetiza.RemoverConteudos(const AValue: string; const AConteudo: TArray<string>): string;
-var
-  LPalavra: string;
+  I, J, K, LIndice: Integer;
+  LCaracterMudo, LCopiarFonema, LUltimoFonema: Boolean;
   LPalavras: TArray<string>;
+  LPalavra: string;
 begin
+  // define o tamanho dos vetores
+  SetLength(LPalavraAtual, 256);
+  SetLength(fonaux, 256);
+  SetLength(LPalavraFonetica, 256);
+  SetLength(fonfon, 256);
+
+  // o texto eh armazenado no vetor: cada palavra ocupa uma posicao do vetor
   LPalavras := AValue.Split([' ']);
+
+  // percorre o vetor, palavra a palavra
+  for LIndice := 0 to Pred(Length(LPalavras)) do
+  begin
+    J := 0;
+
+    // branqueia os vetores
+    for I := 0 to 255 do
+    begin
+      LPalavraFonetica[I] := ' ';
+      fonfon[I] := ' ';
+    end;
+
+    // vetores recebem os caracteres da palavra atual
+    LPalavraAtual := LPalavras[LIndice].ToCharArray;
+    fonaux := LPalavraAtual;
+
+    // se a palavra possuir apenas 1 caracter, nao altera a palavra
+    if LPalavras[LIndice].Length = 1 then
+    begin
+      LPalavraFonetica[0] := LPalavraAtual[0];
+
+      // se o caracter for "_", troca por espaco em branco
+      if LPalavraAtual[0] = '_' then
+        LPalavraFonetica[0] := ' '
+      else if ((LPalavraAtual[0] = 'E') or (LPalavraAtual[0] = '&') or (LPalavraAtual[0] = 'I')) then // se for "E", "&" ou "I", troca por "i"
+        LPalavraFonetica[0] := 'i';
+    end
+    else
+    begin
+      // caracter nao eh modificado
+      for I := 0 to Pred(LPalavras[LIndice].Length) do
+      begin
+        if LPalavraAtual[I] = '_' then // _ -> Y
+          fonfon[I] := 'Y'
+        else if LPalavraAtual[i] = '&' then // & -> i
+          fonfon[I] := 'i'
+        else if ((LPalavraAtual[I] = 'E') or (LPalavraAtual[I] = 'Y') or (LPalavraAtual[I] = 'I')) then // E, Y, I -> i
+          fonfon[I] := 'i'
+        else if ((LPalavraAtual[I] = 'O') or (LPalavraAtual[I] = 'U')) then // O, U -> u
+          fonfon[I] := 'o'
+        else if LPalavraAtual[I] = 'A' then // A -> a
+          fonfon[I] := 'a'
+        else if LPalavraAtual[I] = 'S' then // S -> s
+          fonfon[I] := 's'
+        else
+          fonfon[I] := LPalavraAtual[I];
+      end;
+
+      LUltimoFonema := False;
+      fonaux := fonfon;
+
+      // palavras formadas por apenas 3 consoantes sao dispensadas do processo de fonetizacao
+      if fonaux[3] = ' ' then
+      begin
+        if ((fonaux[0] = 'a') or (fonaux[0] = 'i') or (fonaux[0] = 'o')) then
+          LUltimoFonema := False
+        else if ((fonaux[1] = 'a') or (fonaux[1] = 'i') or (fonaux[1] = 'o')) then
+          LUltimoFonema := False
+        else if ((fonaux[2] = 'a') or (fonaux[2] = 'i') or (fonaux[2] = 'o')) then
+          LUltimoFonema := False
+        else
+        begin
+          LUltimoFonema := True;
+          LPalavraFonetica[0] := fonaux[0];
+          LPalavraFonetica[1] := fonaux[1];
+          LPalavraFonetica[2] := fonaux[2];
+        end;
+      end;
+
+      // se a palavra nao for formada por apenas 3 consoantes...
+      if not LUltimoFonema then
+      begin
+        // percorre a palavra corrente, letra a letra
+        I := 0;
+        while I < LPalavras[LIndice].Length do
+        begin
+          // zera variaveis de controle
+          LCopiarFonema := False;
+          LCaracterMudo := False;
+          newmud := 0;
+
+          TratarCaracterFonetico(fonaux, LPalavraFonetica, I, J, newmud, LCopiarFonema, LCaracterMudo);
+
+          // copia caracter corrente
+          if LCopiarFonema then
+          begin
+            LPalavraFonetica[J] := fonaux[I];
+            Inc(J);
+          end;
+
+          // insercao de i apos consoante muda
+          if LCaracterMudo then
+            LPalavraFonetica[J] := fonaux[I];
+
+          if (LCaracterMudo or (newmud = 1)) then
+          begin
+            Inc(J);
+            K := 0;
+
+            while K = 0 do
+            begin
+              // e final mudo
+              if fonaux[I + 1] = ' ' then
+              begin
+                LPalavraFonetica[J] := 'i';
+                K := 1;
+              end
+              else if ((fonaux[I + 1] = 'a') or (fonaux[I + 1] = 'i') or (fonaux[I + 1] = 'o')) then
+                K := 1
+              else if LPalavraFonetica[J - 1] = 'X' then
+              begin
+                LPalavraFonetica[J] := 'i';
+                Inc(J);
+                K := 1;
+              end
+              else if fonaux[I + 1] = 'R' then
+                K := 1
+              else if fonaux[I + 1] = 'L' then
+                K := 1
+              else if fonaux[I + 1] <> 'H' then
+              begin
+                LPalavraFonetica[J] := 'i';
+                Inc(J);
+                K := 1;
+              end
+              else
+                Inc(I);
+            end;
+          end;
+
+          // incrementa o contador para ir para o próximo caracter
+          Inc(I);
+        end;
+      end;
+    end;
+
+    for i := 0 to Pred(LPalavras[LIndice].Length) + 3 do
+    begin
+      if LPalavraFonetica[I] = 'i' then
+        LPalavraFonetica[I] := 'I'
+      else if LPalavraFonetica[i] = 'a' then // a -> A
+        LPalavraFonetica[I] := 'A'
+      else if LPalavraFonetica[I] = 'o' then // o -> U
+        LPalavraFonetica[I] := 'U'
+      else if LPalavraFonetica[I] = 's' then // s -> S
+        LPalavraFonetica[I] := 'S'
+      else if LPalavraFonetica[I] = 'E' then // E -> b
+        LPalavraFonetica[I] := ' '
+      else if LPalavraFonetica[I] = 'Y' then // Y -> _
+        LPalavraFonetica[I] := '_';
+    end;
+
+    // retorna a palavra, modificada, ao vetor que contem o texto
+    LPalavras[LIndice] := '';
+    for LCaracter in LPalavraFonetica do
+      LPalavras[LIndice] := LPalavras[LIndice] + LCaracter;
+  end;
+
+  // remonta as palavras armazenadas no vetor em um unico string
   for LPalavra in LPalavras do
   begin
-    if MatchStr(LPalavra, AConteudo) then
+    if LPalavra.Trim.IsEmpty then
       Continue;
     if not Result.Trim.IsEmpty then
       Result := Result + ' ';
-    Result := Result + LPalavra;
+    Result := Result + LPalavra.Trim;
   end;
+
+  Result := Result.ToUpper.Trim;
 end;
 
-function TFonetiza.SomarCaracteres(const AValue: string): string;
-var
-  LSoma, LValor: Integer;
-  LPalavras: TList<string>;
-  LPalavra: string;
-  I: Integer;
-begin
-  I := 0;
-  LSoma := 0;
-  LPalavras := TList<string>.Create();
-  try
-    LPalavras.AddRange(AValue.Split([' ']));
-    while I < LPalavras.Count do
-    begin
-      LPalavra := LPalavras.Items[I];
-			if LPalavra.Equals('E') then
-      begin
-				LPalavras.Delete(I);
-				Dec(I);
-			end
-      else
-      begin
-				if LPalavra.Equals('MIL') then
-        begin
-					if LSoma = 0 then
-						LSoma := 1000
-					else
-          begin
-						LSoma := LSoma * 1000;
-						LPalavras.Delete(I);
-						Dec(I);
-					end;
-				end
-        else
-        begin
-					LValor := StrToIntDef(LPalavra, 0);
-					if LValor <> 0 then
-          begin
-						if LSoma <> 0 then
-            begin
-							LPalavras.Delete(I - 1);
-							Dec(I);
-						end;
-						LSoma := LSoma + LValor;
-					end
-					else
-          begin
-						if LSoma <> 0 then
-							LPalavras.Items[I - 1] := LSoma.ToString;
-						LSoma := 0;
-					end;
-        end;
-      end;
-      Inc(I);
-    end;
-		if LSoma <> 0 then
-			LPalavras.Items[Pred(LPalavras.Count)] := LSoma.ToString;
-    for LPalavra in LPalavras do
-    begin
-      if not Result.IsEmpty then
-        Result := Result + ' ';
-      Result := Result + LPalavra;
-    end;
-  finally
-    LPalavras.Free;
-  end;
-end;
-
-function TFonetiza.SubstituirConteudos(const AValue: string; const AConteudo: TArray<TArray<string>>): string;
-var
-  LPalavra, LResultado: string;
-  LConteudo, LPalavras: TArray<string>;
-begin
-  LPalavras := AValue.Split([' ']);
-  for LPalavra in LPalavras do
-  begin
-    LResultado := LPalavra;
-    for LConteudo in AConteudo do
-    begin
-      if LConteudo[0].Equals(LPalavra) then
-      begin
-        LResultado := LConteudo[1];
-        Break;
-      end;
-    end;
-    if not Result.Trim.IsEmpty then
-      Result := Result + ' ';
-    Result := Result + LResultado;
-  end;
-end;
-
-procedure TFonetiza.TratarCaracterFonetico(var fonaux, APalavraFonetica: TCharArray; var I, J, newmud: Integer; var ACopiarFonema, ACaracterMudo: Boolean);
+procedure TFonetizaCore.TratarCaracterFonetico(var fonaux, APalavraFonetica: TCharArray; var I, J, newmud: Integer; var ACopiarFonema, ACaracterMudo: Boolean);
 var
   X: Integer;
 begin
@@ -800,206 +817,6 @@ begin
       Inc(J);
     end;
   end;
-end;
-
-function TFonetiza.GerarConteudoFonetico(const AValue: string): string;
-var
-  // vetores de caracteres utilizadas para manipular o texto
-  LPalavraAtual: TCharArray;
-  fonaux: TCharArray;
-  LPalavraFonetica: TCharArray;
-  fonfon: TCharArray;
-
-  // indica se o fonema eh mudo
-  newmud: Integer;
-
-  LCaracter: Char;
-  I, J, K, LIndice: Integer;
-  LCaracterMudo, LCopiarFonema, LUltimoFonema: Boolean;
-  LPalavras: TArray<string>;
-  LPalavra: string;
-begin
-  // define o tamanho dos vetores
-  SetLength(LPalavraAtual, 256);
-  SetLength(fonaux, 256);
-  SetLength(LPalavraFonetica, 256);
-  SetLength(fonfon, 256);
-
-  // o texto eh armazenado no vetor: cada palavra ocupa uma posicao do vetor
-  LPalavras := AValue.Split([' ']);
-
-  // percorre o vetor, palavra a palavra
-  for LIndice := 0 to Pred(Length(LPalavras)) do
-  begin
-    J := 0;
-
-    // branqueia os vetores
-    for I := 0 to 255 do
-    begin
-      LPalavraFonetica[I] := ' ';
-      fonfon[I] := ' ';
-    end;
-
-    // vetores recebem os caracteres da palavra atual
-    LPalavraAtual := LPalavras[LIndice].ToCharArray;
-    fonaux := LPalavraAtual;
-
-    // se a palavra possuir apenas 1 caracter, nao altera a palavra
-    if LPalavras[LIndice].Length = 1 then
-    begin
-      LPalavraFonetica[0] := LPalavraAtual[0];
-
-      // se o caracter for "_", troca por espaco em branco
-      if LPalavraAtual[0] = '_' then
-        LPalavraFonetica[0] := ' '
-      else if ((LPalavraAtual[0] = 'E') or (LPalavraAtual[0] = '&') or (LPalavraAtual[0] = 'I')) then // se for "E", "&" ou "I", troca por "i"
-        LPalavraFonetica[0] := 'i';
-    end
-    else
-    begin
-      // caracter nao eh modificado
-      for I := 0 to Pred(LPalavras[LIndice].Length) do
-      begin
-        if LPalavraAtual[I] = '_' then // _ -> Y
-          fonfon[I] := 'Y'
-        else if LPalavraAtual[i] = '&' then // & -> i
-          fonfon[I] := 'i'
-        else if ((LPalavraAtual[I] = 'E') or (LPalavraAtual[I] = 'Y') or (LPalavraAtual[I] = 'I')) then // E, Y, I -> i
-          fonfon[I] := 'i'
-        else if ((LPalavraAtual[I] = 'O') or (LPalavraAtual[I] = 'U')) then // O, U -> u
-          fonfon[I] := 'o'
-        else if LPalavraAtual[I] = 'A' then // A -> a
-          fonfon[I] := 'a'
-        else if LPalavraAtual[I] = 'S' then // S -> s
-          fonfon[I] := 's'
-        else
-          fonfon[I] := LPalavraAtual[I];
-      end;
-
-      LUltimoFonema := False;
-      fonaux := fonfon;
-
-      // palavras formadas por apenas 3 consoantes sao dispensadas do processo de fonetizacao
-      if fonaux[3] = ' ' then
-      begin
-        if ((fonaux[0] = 'a') or (fonaux[0] = 'i') or (fonaux[0] = 'o')) then
-          LUltimoFonema := False
-        else if ((fonaux[1] = 'a') or (fonaux[1] = 'i') or (fonaux[1] = 'o')) then
-          LUltimoFonema := False
-        else if ((fonaux[2] = 'a') or (fonaux[2] = 'i') or (fonaux[2] = 'o')) then
-          LUltimoFonema := False
-        else
-        begin
-          LUltimoFonema := True;
-          LPalavraFonetica[0] := fonaux[0];
-          LPalavraFonetica[1] := fonaux[1];
-          LPalavraFonetica[2] := fonaux[2];
-        end;
-      end;
-
-      // se a palavra nao for formada por apenas 3 consoantes...
-      if not LUltimoFonema then
-      begin
-        // percorre a palavra corrente, letra a letra
-        I := 0;
-        while I < LPalavras[LIndice].Length do
-        begin
-          // zera variaveis de controle
-          LCopiarFonema := False;
-          LCaracterMudo := False;
-          newmud := 0;
-
-          TratarCaracterFonetico(fonaux, LPalavraFonetica, I, J, newmud, LCopiarFonema, LCaracterMudo);
-
-          // copia caracter corrente
-          if LCopiarFonema then
-          begin
-            LPalavraFonetica[J] := fonaux[I];
-            Inc(J);
-          end;
-
-          // insercao de i apos consoante muda
-          if LCaracterMudo then
-            LPalavraFonetica[J] := fonaux[I];
-
-          if (LCaracterMudo or (newmud = 1)) then
-          begin
-            Inc(J);
-            K := 0;
-
-            while K = 0 do
-            begin
-              // e final mudo
-              if fonaux[I + 1] = ' ' then
-              begin
-                LPalavraFonetica[J] := 'i';
-                K := 1;
-              end
-              else if ((fonaux[I + 1] = 'a') or (fonaux[I + 1] = 'i') or (fonaux[I + 1] = 'o')) then
-                K := 1
-              else if LPalavraFonetica[J - 1] = 'X' then
-              begin
-                LPalavraFonetica[J] := 'i';
-                Inc(J);
-                K := 1;
-              end
-              else if fonaux[I + 1] = 'R' then
-                K := 1
-              else if fonaux[I + 1] = 'L' then
-                K := 1
-              else if fonaux[I + 1] <> 'H' then
-              begin
-                LPalavraFonetica[J] := 'i';
-                Inc(J);
-                K := 1;
-              end
-              else
-                Inc(I);
-            end;
-          end;
-
-          // incrementa o contador para ir para o próximo caracter
-          Inc(I);
-        end;
-      end;
-    end;
-
-    for i := 0 to Pred(LPalavras[LIndice].Length) + 3 do
-    begin
-      if LPalavraFonetica[I] = 'i' then
-        LPalavraFonetica[I] := 'I'
-      else if LPalavraFonetica[i] = 'a' then // a -> A
-        LPalavraFonetica[I] := 'A'
-      else if LPalavraFonetica[I] = 'o' then // o -> U
-        LPalavraFonetica[I] := 'U'
-      else if LPalavraFonetica[I] = 's' then // s -> S
-        LPalavraFonetica[I] := 'S'
-      else if LPalavraFonetica[I] = 'E' then // E -> b
-        LPalavraFonetica[I] := ' '
-      else if LPalavraFonetica[I] = 'Y' then // Y -> _
-        LPalavraFonetica[I] := '_';
-    end;
-
-    // retorna a palavra, modificada, ao vetor que contem o texto
-    LPalavras[LIndice] := '';
-    for LCaracter in LPalavraFonetica do
-      LPalavras[LIndice] := LPalavras[LIndice] + LCaracter;
-  end;
-
-  // remonta as palavras armazenadas no vetor em um unico string
-  for LPalavra in LPalavras do
-  begin
-    if LPalavra.Trim.IsEmpty then
-      Continue;
-    if not Result.Trim.IsEmpty then
-      Result := Result + ' ';
-    Result := Result + LPalavra.Trim;
-  end;
-
-  // remove os caracteres duplicados
-  Result := Self.RemoverCaracteresDuplicados(Result);
-
-  Result := Result.ToUpper.Trim;
 end;
 
 end.

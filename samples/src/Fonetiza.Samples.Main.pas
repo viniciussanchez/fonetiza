@@ -24,14 +24,11 @@ implementation
 
 {$R *.dfm}
 
-uses Fonetiza.Impl, Fonetiza.Intf;
+uses Fonetiza;
 
 procedure TFrmMain.btnFonetizarClick(Sender: TObject);
-var
-  LFonetiza: IFonetiza;
 begin
-  LFonetiza := TFonetiza.Create;
-  mmResultadoFonetico.Lines.Add(LFonetiza.Fonetizar(edtConteudo.Text));
+  mmResultadoFonetico.Lines.Add(TFonetiza.New.Fonetizar(edtConteudo.Text));
 end;
 
 end.

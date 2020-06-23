@@ -1,15 +1,18 @@
-program fonetiza;
+program Samples;
 
 uses
   Vcl.Forms,
-  Fonetiza.Impl in '..\src\Fonetiza.Impl.pas',
+  Fonetiza.Utils in '..\src\Fonetiza.Utils.pas',
   Fonetiza.Intf in '..\src\Fonetiza.Intf.pas',
   Fonetiza.Consts in '..\src\Fonetiza.Consts.pas',
-  Fonetiza.Samples.Main in 'src\Fonetiza.Samples.Main.pas' {FrmMain};
+  Fonetiza.Samples.Main in 'src\Fonetiza.Samples.Main.pas' {FrmMain},
+  Fonetiza in '..\src\Fonetiza.pas',
+  Fonetiza.Core in '..\src\Fonetiza.Core.pas';
 
 {$R *.res}
 
 begin
+  ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TFrmMain, FrmMain);
