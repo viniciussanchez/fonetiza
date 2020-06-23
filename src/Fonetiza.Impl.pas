@@ -85,7 +85,7 @@ var
   LCaracter: Char;
 begin
   for LCaracter in AValue do
-    if CharInSet(LCaracter, ['A' .. 'Z', '0' .. '9']) or (LCaracter = ' ') then
+    if CharInSet(LCaracter, ['A' .. 'Z', '0' .. '9']) or (LCaracter = ' ') or (LCaracter = '_') or (LCaracter = '&') then
       Result := Result + LCaracter;
 end;
 

@@ -63,8 +63,8 @@ end;
 
 procedure TTestFonetiza.TestRemoverCaracteresEspeciais;
 const
-  CARACTERES_ESPERADOS = ' VINICIUS SANCHEZ 1995 ';
-  CARACTERES_ESPECIAIS = '<>!@#$%¨&*()_+={}[]?;:,|*"~^´`¨æÆø£Øƒªº¿®½¼ßµþýÝ';
+  CARACTERES_ESPERADOS = ' VINICIUS_SANCHEZ&1995 ';
+  CARACTERES_ESPECIAIS = '<>!@#$%¨*()+={}[]?;:,|*"~^´`¨æÆø£Øƒªº¿®½¼ßµþýÝ';
 var
   LReturn: string;
 begin
