@@ -2,12 +2,13 @@ unit Fonetiza;
 
 interface
 
-uses Fonetiza.Intf, Fonetiza.Core, Fonetiza.Utils;
+uses Fonetiza.Intf, Fonetiza.Core, Fonetiza.Utils, Fonetiza.CodigoFonetico.Core;
 
 type
   TFonetiza = class(TInterfacedObject, IFonetiza)
   private
     FFonetizaCore: TFonetizaCore;
+    FCodigoFonetico: TCodigoFoneticoCore;
     FFonetizaUtils: TFonetizaUtils;
     { IFonetiza }
     function Fonetizar(const AValue: string): string;
@@ -28,6 +29,7 @@ uses System.SysUtils, Fonetiza.Consts;
 constructor TFonetiza.Create;
 begin
   FFonetizaCore := TFonetizaCore.Create;
+  FCodigoFonetico := TCodigoFoneticoCore.Create;
   FFonetizaUtils := TFonetizaUtils.Create;
 end;
 
@@ -35,6 +37,8 @@ destructor TFonetiza.Destroy;
 begin
   if Assigned(FFonetizaCore) then
     FFonetizaCore.Free;
+  if Assigned(FCodigoFonetico) then
+    FCodigoFonetico.Free;
   if Assigned(FFonetizaUtils) then
     FFonetizaUtils.Free;
   inherited;
@@ -60,7 +64,7 @@ end;
 function TFonetiza.GerarCodigoFonetico(const AValue: string): string;
 begin
   Result := Self.Fonetizar(AValue);
-//  Result := CodeGenerator.randomize(Result);
+  Result := FCodigoFonetico.randomize(Result);
 end;
 
 function TFonetiza.GerarListaCodigosFoneticos(const AValue: string): TArray<string>;
@@ -68,7 +72,7 @@ var
   LConteudoFonetico: string;
 begin
   LConteudoFonetico := Self.Fonetizar(AValue);
-//  Result := MultipleCodeGenerator.generateCodes(LConteudoFonetico);
+  Result := FCodigoFonetico.generateCodes(LConteudoFonetico);
 end;
 
 class function TFonetiza.New: IFonetiza;

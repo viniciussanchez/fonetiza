@@ -75,13 +75,13 @@ object FrmMain: TFrmMain
     object edtConteudo: TEdit
       Left = 13
       Top = 31
-      Width = 289
+      Width = 233
       Height = 21
       TabOrder = 0
       TextHint = 'Informe o conte'#250'do para fonetizar'
     end
     object btnFonetizar: TButton
-      Left = 308
+      Left = 252
       Top = 29
       Width = 75
       Height = 25
@@ -102,6 +102,36 @@ object FrmMain: TFrmMain
       Height = 183
       ScrollBars = ssVertical
       TabOrder = 2
+    end
+    object btnCodigoFonetico: TButton
+      Left = 333
+      Top = 29
+      Width = 108
+      Height = 25
+      Caption = 'C'#243'digo Fon'#233'tico'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 3
+      OnClick = btnCodigoFoneticoClick
+    end
+    object btnListaCodigoFonetico: TButton
+      Left = 447
+      Top = 29
+      Width = 162
+      Height = 25
+      Caption = 'Lista de C'#243'digos Fon'#233'ticos'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 4
+      OnClick = btnListaCodigoFoneticoClick
     end
   end
 end
