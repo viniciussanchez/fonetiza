@@ -95,6 +95,11 @@
         <DCCReference Include="..\src\Fonetiza.Utils.pas"/>
         <DCCReference Include="..\src\Fonetiza.Core.pas"/>
         <DCCReference Include="src\Fonetiza.Core.Test.pas"/>
+        <DCCReference Include="..\src\Fonetiza.pas"/>
+        <DCCReference Include="src\Fonetiza.Test.pas"/>
+        <DCCReference Include="..\src\Fonetiza.Intf.pas"/>
+        <DCCReference Include="..\src\Fonetiza.CodigoFonetico.Core.pas"/>
+        <DCCReference Include="..\src\Fonetiza.Consts.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

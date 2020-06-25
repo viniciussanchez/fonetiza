@@ -40,11 +40,11 @@ begin
   SetLength(fonaux, 4);
 	i02 := i03;
   fonaux[3] := char(i02 mod $0100);
-  i01 := (i02 - Ord(fonaux[3])) div $0100; // >>>>>>>> ADDED ORD FUNCTION BY VINICIUS
+  i01 := (i02 - Ord(fonaux[3])) div $0100;
   fonaux[2] := char(i01 mod $0100);
-  i02 := (i01 - Ord(fonaux[2])) div $0100; // >>>>>>>> ADDED ORD FUNCTION BY VINICIUS
+  i02 := (i01 - Ord(fonaux[2])) div $0100;
   fonaux[1] := char(i02 mod $0100);
-  i01 := (i02 - Ord(fonaux[1])) div $0100; // >>>>>>>> ADDED ORD FUNCTION BY VINICIUS
+  i01 := (i02 - Ord(fonaux[1])) div $0100;
   fonaux[0] := char(i01 mod $0100);
 	Result := fonaux;
 end;
@@ -108,6 +108,8 @@ begin
 
     for i := 0 to Pred(Length(permutations)) do
     begin
+      SetLength(subPalavras, 0);
+
       for j := 0 to Pred(size) do
       begin
         if permutations[i][j] then
@@ -183,6 +185,7 @@ var
   component: TArray<string>; // texto eh armazenado no vetor
 begin
   // gera um codigo identificador de 10 caracteres para um texto qualquer
+  Result := EmptyStr;
 
 	fon09 := 0;
 	fon11 := 0;
@@ -420,36 +423,32 @@ begin
   j := 0;
   for i := 0 to 4 do
   begin
-    auxStr := EmptyStr; // >>>>>>>> ADDED BY VINICIUS
-    for lchar in fonrnd do
-      auxStr := auxStr + lchar;
-    auxStr := auxStr.Trim;
+    auxStr := fonrnd[i];
 
-    w0 := Integer(fonrnd[i]);
+    w0 := Ord(fonrnd[i]);
     w0 := w0 shr 4;
     work[0] := char(w0);
 
-    if (work[0] <= '\u0009') then
-      finalRand[j] := char(Integer(work[0]) + 48)
+    if Ord(work[0]) <= $0009 then
+      finalRand[j] := char(Ord(work[0]) + 48)
     else
-      finalRand[j] := char(Integer(work[0]) - 10 + 97);
+      finalRand[j] := char(Ord(work[0]) - 10 + 97);
 
-    w1 := Integer(fonrnd[i]);
+    w1 := Ord(fonrnd[i]);
     w1 := w1 shl 28;
     w0 := w1 shr 28;
     work[0] := char(w0);
 
-    if (work[0] <= '\u0009') then
-      finalRand[j + 1] := char(Integer(work[0]) + 48)
+    if Ord(work[0]) <= $0009 then
+      finalRand[j + 1] := char(Ord(work[0]) + 48)
     else
-      finalRand[j + 1] := char(Integer(work[0]) - 10 + 97);
+      finalRand[j + 1] := char(Ord(work[0]) - 10 + 97);
 
     j := j + 2;
   end;
 
   for lchar in finalRand do
     Result := Result + lchar;
-  Result := Result.Trim;
 end;
 
 function TCodigoFoneticoCore.tabEbc(const str: string): string;
@@ -458,6 +457,7 @@ var
   fonaux: TCharArray;
   lchar: char;
 begin
+  Result := EmptyStr;
   SetLength(fonaux, 256);
   fonaux := str.ToCharArray;
   for i := 0 to Pred(str.Length) do
@@ -549,6 +549,7 @@ var
   fonaux: TCharArray;
   lchar: Char;
 begin
+  Result := EmptyStr;
   SetLength(fonaux, 256);
   fonaux := str.ToCharArray;
   for i := 0 to Pred(str.Length) do

@@ -42,6 +42,9 @@ object FrmMain: TFrmMain
     BevelOuter = bvNone
     ParentBackground = False
     TabOrder = 1
+    DesignSize = (
+      619
+      274)
     object Label1: TLabel
       Left = 13
       Top = 10
@@ -100,6 +103,7 @@ object FrmMain: TFrmMain
       Top = 82
       Width = 596
       Height = 183
+      Anchors = [akLeft, akTop, akRight, akBottom]
       ScrollBars = ssVertical
       TabOrder = 2
     end
