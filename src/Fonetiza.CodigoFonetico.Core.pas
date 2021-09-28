@@ -20,7 +20,7 @@ type
 
 implementation
 
-uses System.Classes;
+uses System.Classes, System.Math;
 
 { TCodigoFoneticoCore }
 
@@ -104,7 +104,7 @@ begin
     end;
 
     size := Length(palavras);
-    permutations := allPermutations[Pred(size)];
+    permutations := allPermutations[IfThen(size = 0, 0, Pred(size))];
 
     for i := 0 to Pred(Length(permutations)) do
     begin
