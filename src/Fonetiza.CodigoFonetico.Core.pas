@@ -218,34 +218,22 @@ begin
       for j := 0 to 255 do
         fonaux[j] := ' ';
 
-      j := 0;
-      // percorre a palavra, letra a letra
-      while j < auxStr.Length do
+      // se a palavra iniciar por vogal, insere um "R" no inicio da palavra
+      if ((foncmp[0] = 'I') or (foncmp[0] = 'A') or (foncmp[0] = 'U')) then
       begin
-        // se a palavra iniciar por vogal, insere um "R" no inicio da palavra
-        if ((foncmp[0] = 'I') or (foncmp[0] = 'A') or (foncmp[0] = 'U')) then
+        fonaux[0] := 'R';
+        for j := 0 to Pred(auxStr.Length) do
+          fonaux[j + 1] := foncmp[j];
+      end
+      else
+      begin
+        // se a palavra iniciar com "GI", suprime o "G"
+        if ((foncmp[0] = 'G') and (auxStr.Length > 1)) then
         begin
-          fonaux[0] := 'R';
-          for j := 0 to Pred(auxStr.Length) do
-            fonaux[j + 1] := foncmp[j];
-        end
-        else
-        begin
-          // se a palavra iniciar com "GI", suprime o "G"
-          if ((foncmp[0] = 'G') and (auxStr.Length > 1)) then
+          if (foncmp[1] = 'I') then
           begin
-            if (foncmp[1] = 'I') then
-            begin
-              for j := 0 to auxStr.Length - 2 do
-                fonaux[j] := foncmp[j + 1];
-              Inc(J);
-            end
-            else
-            begin
-              // senao apenas copia a palavra original
-              for j := 0 to Pred(auxStr.Length) do
-                fonaux[j] := foncmp[j];
-            end;
+            for j := 0 to auxStr.Length - 2 do
+              fonaux[j] := foncmp[j + 1];
           end
           else
           begin
@@ -253,10 +241,16 @@ begin
             for j := 0 to Pred(auxStr.Length) do
               fonaux[j] := foncmp[j];
           end;
+        end
+        else
+        begin
+          // senao apenas copia a palavra original
+          for j := 0 to Pred(auxStr.Length) do
+            fonaux[j] := foncmp[j];
         end;
       end;
 
-      auxStr := EmptyStr; // >>>>>>>> ADDED BY VINICIUS
+      auxStr := EmptyStr;
       for lchar in fonaux do
         auxStr := auxStr + lchar;
       auxStr := auxStr.Trim;
