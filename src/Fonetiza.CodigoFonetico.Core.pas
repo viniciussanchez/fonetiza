@@ -181,7 +181,7 @@ var
   fonrnd, finalRand: TCharArray; // estruturas que armazenam o codigo
   work: TCharArray; // variavel de manipulacao
   foncmp, fonaux: TCharArray; // matrizes de manipulacao
-	priStr, auxStr, modStr, rand: string; // string de manipulacao
+	auxStr: string; // string de manipulacao
   component: TArray<string>; // texto eh armazenado no vetor
 begin
   // gera um codigo identificador de 10 caracteres para um texto qualquer
