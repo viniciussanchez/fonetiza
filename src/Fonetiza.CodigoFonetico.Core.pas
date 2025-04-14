@@ -362,6 +362,7 @@ begin
       for j := 7 to Pred(auxStr.Length) do
         foncmp[j] := ' ';
 
+      auxStr := EmptyStr; // >>>>>>>> ADDED BY VINICIUS
       for lchar in foncmp do
         auxStr := auxStr + lchar;
       auxStr := auxStr.Trim;
@@ -373,8 +374,6 @@ begin
     fon11 := fon11 + randomic(tabEbc(auxStr));
     fon12 := fon12 + randomic(tabNor(tabEbc(auxStr)));
   end;
-
-  component := str.Split([' ']);
 
   // percorre o texto, palavra a palavra
   for i := 0 to Pred(Length(component)) do
